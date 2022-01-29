@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -17,6 +16,8 @@ type txt struct {
 	Word  string `json:"word"`
 	Count int    `json:"count"`
 }
+
+var punctuation = [...]string{",", ".", "?", "!", ";"}
 
 func main() {
 
@@ -47,18 +48,6 @@ func postText(c *gin.Context) {
 		t.Count = v
 	}
 
-	fmt.Println("t is ", t)
-	/*
-		user := &User{Name: "Frank"}
-	    b, err := json.Marshal(user) */
-
-	b, err := json.Marshal(txt{Word: t.Word, Count: t.Count})
-	//b, err := json.Marshal(t)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(b))
 	c.JSON(http.StatusCreated, gin.H{
 		"code":          http.StatusOK,
 		"mostusedwords": m})
@@ -73,6 +62,11 @@ func count(input string) map[string]int {
 	m := make(map[string]int, len(s))
 
 	for _, v := range s {
+
+		for _, p := range punctuation {
+			v = strings.Replace(v, p, "", -1)
+		}
+
 		m[strings.ToLower(v)]++
 	}
 
